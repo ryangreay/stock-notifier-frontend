@@ -71,13 +71,23 @@ export interface AuthHealthResponse {
   user: User;
 }
 
+export interface TelegramStatus {
+  is_connected: boolean;
+  connected_at: string | null;
+}
+
 // Auth endpoints
 export const auth = {
-  login: (credentials: LoginCredentials) => {
+  login: async (credentials: LoginCredentials) => {
     const formData = new URLSearchParams();
     formData.append('username', credentials.username);
     formData.append('password', credentials.password);
-    return api.post('/auth/token', formData);
+    
+    return api.post('/auth/token', formData.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
   },
   register: (data: RegisterData) => 
     api.post('/auth/register', data),
@@ -115,6 +125,13 @@ export const model = {
     api.post('/train', data),
   untrain: (data: UntrainRequest) => 
     api.post('/untrain', data),
+};
+
+export const telegram = {
+  getStatus: () => 
+    api.get<TelegramStatus>('/telegram-status'),
+  connect: (connection_token: string) => 
+    api.post('/connect-telegram', { connection_token }),
 };
 
 export default api; 

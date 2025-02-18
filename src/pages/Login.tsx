@@ -28,6 +28,7 @@ const Login = () => {
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid email or password');
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +40,9 @@ const Login = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        mt: 8,
+        width: '100vw',
+        minHeight: 'calc(100vh - 64px - 56px)', // Subtract AppBar and Footer heights
+        p: 3,
       }}
     >
       <Paper
@@ -49,8 +52,9 @@ const Login = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          maxWidth: 400,
           width: '100%',
+          maxWidth: '1200px',
+          mx: 'auto', // Center horizontally
         }}
       >
         <Typography component="h1" variant="h5">
@@ -61,7 +65,16 @@ const Login = () => {
             {error}
           </Alert>
         )}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
+        <Box 
+          component="form" 
+          onSubmit={handleSubmit} 
+          sx={{ 
+            mt: 3, 
+            width: '100%', 
+            maxWidth: '600px',
+            mx: 'auto', // Center horizontally
+          }}
+        >
           <TextField
             margin="normal"
             required

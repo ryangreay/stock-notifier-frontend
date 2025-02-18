@@ -44,9 +44,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
         </Toolbar>
       </AppBar>
-      <Container component="main" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1, width: '100%' }}>
         {children}
-      </Container>
+      </Box>
       <Box
         component="footer"
         sx={{
@@ -59,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               : theme.palette.grey[800],
         }}
       >
-        <Container maxWidth="sm">
+        <Container maxWidth={false}>
           <Typography variant="body2" color="text.secondary" align="center">
             © {new Date().getFullYear()} Stock Notifier
           </Typography>
