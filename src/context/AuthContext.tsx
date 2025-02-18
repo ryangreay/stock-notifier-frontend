@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../services/api';
-
-interface User {
-  id: number;
-  email: string;
-  full_name: string;
-}
+import type { User } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -21,15 +16,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
-    if (token) {
-      // TODO: Validate token and get user info
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
+  // Function to load user data
+  const loadUser = async (token: string) => {
+    try {
+      const response = await auth.getCurrentUser();
+      setUser(response.data.user);
+    } catch (error) {
+      console.error('Failed to load user:', error);
+      // If we can't get user info, clear the tokens
+      localStorage.removeItem('token');
+      localStorage.removeItem('refresh_token');
+      setUser(null);
     }
+  };
+
+  // Validate token on mount
+  useEffect(() => {
+    const validateAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Validate the token
+        await auth.validateToken();
+        // If valid, load user data
+        await loadUser(token);
+      } catch (error) {
+        // If token is invalid, try to refresh it
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          try {
+            const response = await auth.refreshToken(refreshToken);
+            localStorage.setItem('token', response.data.access_token);
+            localStorage.setItem('refresh_token', response.data.refresh_token);
+            await loadUser(response.data.access_token);
+          } catch (refreshError) {
+            // If refresh fails, clear everything
+            localStorage.removeItem('token');
+            localStorage.removeItem('refresh_token');
+            setUser(null);
+          }
+        } else {
+          // No refresh token, clear everything
+          localStorage.removeItem('token');
+          setUser(null);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    validateAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -38,8 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { access_token, refresh_token } = response.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
-      // TODO: Get user info and set user state
-      setUser({ id: 1, email, full_name: '' }); // Placeholder
+      await loadUser(access_token);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -54,11 +93,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (email: string, fullName: string, password: string) => {
     try {
-      const response = await auth.register({ email, full_name: fullName, password });
-      const { access_token, refresh_token } = response.data;
+      // First register the user
+      const registerResponse = await auth.register({ 
+        email, 
+        full_name: fullName, 
+        password 
+      });
+      
+      // Get tokens from registration response
+      const { access_token, refresh_token } = registerResponse.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
-      setUser({ id: 1, email, full_name: fullName }); // Placeholder
+      
+      // Load user data
+      await loadUser(access_token);
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;

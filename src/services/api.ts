@@ -59,6 +59,18 @@ export interface UntrainRequest {
   symbols: string[];
 }
 
+export interface User {
+  id: number;
+  email: string;
+  full_name: string;
+}
+
+export interface AuthHealthResponse {
+  status: string;
+  timestamp: string;
+  user: User;
+}
+
 // Auth endpoints
 export const auth = {
   login: (credentials: LoginCredentials) => {
@@ -71,6 +83,10 @@ export const auth = {
     api.post('/auth/register', data),
   refreshToken: (refresh_token: string) => 
     api.post('/auth/refresh-token', { refresh_token }),
+  getCurrentUser: () => 
+    api.get<AuthHealthResponse>('/health/auth'),
+  validateToken: () => 
+    api.get<AuthHealthResponse>('/health/auth'),
 };
 
 // Stocks endpoints
