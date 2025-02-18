@@ -36,10 +36,12 @@ const SettingsPanel = () => {
     notify_market_close: true,
     timezone: 'America/New_York',
   });
+  const [originalSettings, setOriginalSettings] = useState<UserSettings | null>(null);
   const [movementThresholdInput, setMovementThresholdInput] = useState('2.5');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showRetrainAlert, setShowRetrainAlert] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -50,12 +52,23 @@ const SettingsPanel = () => {
       setIsLoading(true);
       const response = await settings.getSettings();
       setUserSettings(response.data);
+      setOriginalSettings(response.data);
       setMovementThresholdInput((response.data.significant_movement_threshold * 100).toFixed(1));
     } catch (err) {
       setError('Failed to load settings');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const checkIfRetrainingNeeded = (newSettings: UserSettings) => {
+    if (!originalSettings) return false;
+    
+    return (
+      newSettings.training_timeframe !== originalSettings.training_timeframe ||
+      newSettings.significant_movement_threshold !== originalSettings.significant_movement_threshold ||
+      newSettings.prediction_threshold !== originalSettings.prediction_threshold
+    );
   };
 
   const handleChange = (field: keyof UserSettings) => (
@@ -111,11 +124,20 @@ const SettingsPanel = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setShowRetrainAlert(false);
     setIsLoading(true);
 
     try {
       await settings.updateSettings(userSettings);
-      setSuccess('Settings updated successfully');
+      const needsRetraining = checkIfRetrainingNeeded(userSettings);
+      setOriginalSettings(userSettings);
+      
+      if (needsRetraining) {
+        setShowRetrainAlert(true);
+        setSuccess('Settings updated successfully. Please retrain your models for the changes to take effect.');
+      } else {
+        setSuccess('Settings updated successfully');
+      }
     } catch (err) {
       setError('Failed to update settings');
     } finally {
@@ -130,6 +152,11 @@ const SettingsPanel = () => {
       </Typography>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+      {showRetrainAlert && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          You have changed settings that affect model predictions. Please retrain your models for each stock to apply these changes.
+        </Alert>
+      )}
       
       <Box component="form" onSubmit={handleSubmit}>
         <Grid container spacing={3}>
