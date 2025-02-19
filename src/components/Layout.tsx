@@ -34,19 +34,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShowChartIcon sx={{ color: theme.palette.primary.main, fontSize: 32 }} />
-            <Typography 
-              variant="h6" 
-              component="div" 
+            <Box 
               sx={{ 
-                fontWeight: 700,
-                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                },
               }}
+              onClick={() => navigate('/')}
             >
-              StockNudger
-            </Typography>
+              <ShowChartIcon sx={{ color: theme.palette.primary.main, fontSize: 32 }} />
+              <Typography 
+                variant="h6" 
+                component="div" 
+                sx={{ 
+                  fontWeight: 700,
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                StockNudger
+              </Typography>
+            </Box>
           </Box>
           
           {user ? (
