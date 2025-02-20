@@ -2,11 +2,11 @@ import React from 'react';
 import { AppBar, Box, Container, Toolbar, Typography, Button, useTheme } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import { Logo } from './Logo';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               }}
               onClick={() => navigate('/')}
             >
-              <ShowChartIcon sx={{ color: theme.palette.primary.main, fontSize: 32 }} />
+              <Logo color={theme.palette.primary.main} />
               <Typography 
                 variant="h6" 
                 component="div" 

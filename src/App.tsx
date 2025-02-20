@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
+import Favicon from './components/Favicon';
 
 // Create theme instance
 const theme = createTheme({
@@ -147,6 +148,7 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Favicon />
       <AuthProvider>
         <Router>
           <Layout>
