@@ -8,6 +8,10 @@ import {
   Paper,
   useTheme,
   alpha,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
@@ -15,6 +19,10 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
 import TelegramIcon from '@mui/icons-material/Telegram';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
@@ -42,6 +50,29 @@ const LandingPage = () => {
       icon: <TelegramIcon sx={{ fontSize: 40 }} />,
       title: 'Telegram Integration',
       description: 'Receive predictions and alerts directly through Telegram, keeping you updated wherever you are.',
+    },
+  ];
+
+  const technicalIndicators = [
+    {
+      icon: <TrendingUpIcon />,
+      title: 'Moving Averages',
+      description: 'Moving averages to identify trends and potential support/resistance levels',
+    },
+    {
+      icon: <BarChartIcon />,
+      title: 'Volume Analysis',
+      description: 'Trading volume patterns to confirm price movements and market sentiment',
+    },
+    {
+      icon: <SignalCellularAltIcon />,
+      title: 'MACD',
+      description: 'Moving Average Convergence Divergence for trend direction and momentum',
+    },
+    {
+      icon: <AutoGraphIcon />,
+      title: 'RSI & Bollinger Bands',
+      description: 'Relative Strength Index and volatility bands for overbought/oversold conditions',
     },
   ];
 
@@ -180,6 +211,103 @@ const LandingPage = () => {
                 </Paper>
               </Grid>
             ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Technical Analysis Section */}
+      <Box 
+        sx={{ 
+          width: '100%', 
+          background: `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+          py: 8,
+          borderTop: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 4, sm: 6, md: 8, lg: 12 } }}>
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 600,
+                  mb: 3,
+                }}
+              >
+                Advanced ML Technology
+              </Typography>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                Our Random Forest Classifier analyzes multiple technical indicators to provide accurate predictions of significant price movements.
+              </Typography>
+              <List>
+                {technicalIndicators.map((indicator, index) => (
+                  <ListItem key={index} sx={{ py: 1 }}>
+                    <ListItemIcon sx={{ color: theme.palette.primary.main }}>
+                      {indicator.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Typography variant="h6" sx={{ mb: 0.5 }}>
+                          {indicator.title}
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography variant="body2" color="text.secondary">
+                          {indicator.description}
+                        </Typography>
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  p: 4,
+                  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
+                  borderRadius: 4,
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                }}
+              >
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+                  Model Performance
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  Our machine learning model combines multiple technical indicators to identify potential market movements with high accuracy:
+                </Typography>
+                <List>
+                  <ListItem>
+                    <ListItemIcon>
+                      <AutoGraphIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Random Forest Classifier"
+                      secondary="Ensemble learning for robust predictions"
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemIcon>
+                      <TimelineIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Historical Analysis"
+                      secondary="Training on extensive market data"
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemIcon>
+                      <PrecisionManufacturingIcon color="primary" />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Continuous Learning"
+                      secondary="Model retraining with new market data"
+                    />
+                  </ListItem>
+                </List>
+              </Box>
+            </Grid>
           </Grid>
         </Container>
       </Box>
