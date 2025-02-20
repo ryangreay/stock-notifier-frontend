@@ -22,6 +22,7 @@ import type { UserStock, UserSettings } from '../services/api';
 import SettingsPanel from '../components/SettingsPanel';
 import TelegramConnect from '../components/TelegramConnect';
 import PredictionModal from '../components/PredictionModal';
+import ModelTrainingModal from '../components/ModelTrainingModal';
 
 const Dashboard = () => {
   const [userStocks, setUserStocks] = useState<UserStock[]>([]);
@@ -37,6 +38,9 @@ const Dashboard = () => {
   const [trainSuccess, setTrainSuccess] = useState<string | null>(null);
   const [trainError, setTrainError] = useState<{symbol: string, message: string} | null>(null);
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
+  const [trainingMetrics, setTrainingMetrics] = useState(null);
+  const [trainingModalOpen, setTrainingModalOpen] = useState(false);
+  const [trainedSymbol, setTrainedSymbol] = useState('');
 
   useEffect(() => {
     loadUserStocks();
@@ -69,8 +73,11 @@ const Dashboard = () => {
       setTrainSuccess(null);
       setTrainError(null);
       setTrainingStock(symbol);
-      await model.train({ symbol });
+      const response = await model.train({ symbol });
       setTrainSuccess(symbol);
+      setTrainingMetrics(response.data.metrics);
+      setTrainedSymbol(symbol);
+      setTrainingModalOpen(true);
       setTimeout(() => {
         setTrainSuccess(null);
       }, 2000);
@@ -295,6 +302,16 @@ const Dashboard = () => {
         onNotifyChange={(e) => setNotifyEnabled(e.target.checked)}
         onPredict={makePrediction}
         movementThreshold={userSettings?.significant_movement_threshold}
+      />
+      <ModelTrainingModal
+        open={trainingModalOpen}
+        onClose={() => {
+          setTrainingModalOpen(false);
+          setTrainingMetrics(null);
+          setTrainedSymbol('');
+        }}
+        metrics={trainingMetrics}
+        symbol={trainedSymbol}
       />
     </Box>
   );

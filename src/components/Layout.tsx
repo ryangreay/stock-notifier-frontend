@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppBar, Box, Container, Toolbar, Typography, Button, useTheme } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -14,6 +14,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const theme = useTheme();
 
@@ -21,6 +22,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     logout();
     navigate('/login');
   };
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -90,32 +93,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Button>
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                color="inherit"
-                onClick={() => navigate('/login')}
-                startIcon={<LoginIcon />}
-                sx={{
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.05)',
-                  },
-                }}
-              >
-                Login
-              </Button>
-              <Button
-                color="inherit"
-                onClick={() => navigate('/register')}
-                startIcon={<PersonAddIcon />}
-                sx={{
-                  '&:hover': {
-                    background: 'rgba(255, 255, 255, 0.05)',
-                  },
-                }}
-              >
-                Register
-              </Button>
-            </Box>
+            !isAuthPage && (
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  color="inherit"
+                  onClick={() => navigate('/login')}
+                  startIcon={<LoginIcon />}
+                  sx={{
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.05)',
+                    },
+                  }}
+                >
+                  Login
+                </Button>
+                <Button
+                  color="inherit"
+                  onClick={() => navigate('/register')}
+                  startIcon={<PersonAddIcon />}
+                  sx={{
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.05)',
+                    },
+                  }}
+                >
+                  Register
+                </Button>
+              </Box>
+            )
           )}
         </Toolbar>
       </AppBar>
