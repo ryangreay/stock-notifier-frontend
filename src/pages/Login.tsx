@@ -9,10 +9,14 @@ import {
   Alert,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import GoogleLoginButton from '../components/GoogleLoginButton';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,12 +30,30 @@ const Login = () => {
     try {
       await login(email, password);
       navigate('/dashboard');
-    } catch (err) {
+    } catch (err: any) {
       setError('Invalid email or password');
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (token: string) => {
+    setError('');
+    setIsLoading(true);
+    try {
+      await googleLogin(token);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Google login failed');
+      console.error('Google login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google login failed');
   };
 
   return (
@@ -108,10 +130,21 @@ const Login = () => {
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
+
+          {GOOGLE_CLIENT_ID && (
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <GoogleLoginButton
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+              />
+            </GoogleOAuthProvider>
+          )}
+
           <Button
             fullWidth
             variant="text"
             onClick={() => navigate('/register')}
+            sx={{ mt: 2 }}
           >
             Don't have an account? Sign Up
           </Button>

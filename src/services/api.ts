@@ -76,6 +76,10 @@ export interface TelegramStatus {
   connected_at: string | null;
 }
 
+export interface GoogleToken {
+  token: string;
+}
+
 // Auth endpoints
 export const auth = {
   login: async (credentials: LoginCredentials) => {
@@ -97,6 +101,8 @@ export const auth = {
     api.get<AuthHealthResponse>('/health/auth'),
   validateToken: () => 
     api.get<AuthHealthResponse>('/health/auth'),
+  googleLogin: (token: string) =>
+    api.post('/auth/google-login', { token }),
 };
 
 // Stocks endpoints
