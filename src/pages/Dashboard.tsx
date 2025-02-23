@@ -19,6 +19,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  LinearProgress,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { stocks, model, settings } from '../services/api';
@@ -27,6 +28,7 @@ import SettingsPanel from '../components/SettingsPanel';
 import TelegramConnect from '../components/TelegramConnect';
 import PredictionModal from '../components/PredictionModal';
 import ModelTrainingModal from '../components/ModelTrainingModal';
+import { alpha } from '@mui/material/styles';
 
 const Dashboard = () => {
   const [userStocks, setUserStocks] = useState<UserStock[]>([]);
@@ -46,6 +48,7 @@ const Dashboard = () => {
   const [trainingMetrics, setTrainingMetrics] = useState(null);
   const [trainingModalOpen, setTrainingModalOpen] = useState(false);
   const [trainedSymbol, setTrainedSymbol] = useState('');
+  const STOCK_LIMIT = 5; // Define the stock limit constant
 
   useEffect(() => {
     loadUserStocks();
@@ -108,6 +111,10 @@ const Dashboard = () => {
       setTrainingStock(null);
     }
   };
+
+  // Calculate remaining slots
+  const enabledStocksCount = userStocks.filter(stock => stock.enabled).length;
+  const remainingSlots = STOCK_LIMIT - enabledStocksCount;
 
   const handleAddStock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,47 +179,84 @@ const Dashboard = () => {
         <Grid item xs={12} md={8}>
           {/* Add Stock Form */}
           <Paper sx={{ p: 2, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Add Stock to Watchlist
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Add Stock to Watchlist
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {enabledStocksCount} of {STOCK_LIMIT} stocks watched
+                </Typography>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={(enabledStocksCount / STOCK_LIMIT) * 100}
+                  sx={{ 
+                    width: 100,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 4,
+                    }
+                  }}
+                />
+              </Box>
+            </Box>
+            
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert 
+                severity="error" 
+                sx={{ mb: 2 }}
+                onClose={() => setError('')}
+              >
                 {error}
               </Alert>
             )}
-            <Box component="form" onSubmit={handleAddStock} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-              <FormControl size="small" sx={{ minWidth: 300, maxWidth: '60%' }}>
-                <InputLabel>Select Stock</InputLabel>
-                <Select
-                  value={newSymbol}
-                  onChange={(e) => setNewSymbol(e.target.value)}
-                  label="Select Stock"
-                  disabled={isLoading}
+
+            {remainingSlots === 0 ? (
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                You have reached the maximum limit of {STOCK_LIMIT} stocks. Please remove some stocks before adding new ones.
+              </Alert>
+            ) : (
+              <Box component="form" onSubmit={handleAddStock} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <FormControl size="small" sx={{ minWidth: 300, maxWidth: '60%' }}>
+                  <InputLabel>Select Stock ({remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} remaining)</InputLabel>
+                  <Select
+                    value={newSymbol}
+                    onChange={(e) => setNewSymbol(e.target.value)}
+                    label={`Select Stock (${remainingSlots} slot${remainingSlots !== 1 ? 's' : ''} remaining)`}
+                    disabled={isLoading || remainingSlots === 0}
+                  >
+                    {availableStocks
+                      .filter(stock => !userStocks.some(us => us.symbol === stock.symbol && us.enabled))
+                      .map((stock) => (
+                        <MenuItem key={stock.symbol} value={stock.symbol}>
+                          {stock.name} ({stock.symbol})
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isLoading || !newSymbol || remainingSlots === 0}
                 >
-                  {availableStocks
-                    .filter(stock => !userStocks.some(us => us.symbol === stock.symbol && us.enabled))
-                    .map((stock) => (
-                      <MenuItem key={stock.symbol} value={stock.symbol}>
-                        {stock.name} ({stock.symbol})
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={isLoading || !newSymbol}
-              >
-                Add Stock
-              </Button>
-            </Box>
+                  Add Stock
+                </Button>
+              </Box>
+            )}
           </Paper>
 
           {/* Stocks List */}
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Your Watchlist
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Your Watchlist
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {enabledStocksCount} of {STOCK_LIMIT} stocks watched
+              </Typography>
+            </Box>
             {trainError && trainError.symbol && (
               <Alert 
                 severity="error" 

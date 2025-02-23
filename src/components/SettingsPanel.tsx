@@ -66,8 +66,7 @@ const SettingsPanel = () => {
     
     return (
       newSettings.training_timeframe !== originalSettings.training_timeframe ||
-      newSettings.significant_movement_threshold !== originalSettings.significant_movement_threshold ||
-      newSettings.prediction_threshold !== originalSettings.prediction_threshold
+      newSettings.significant_movement_threshold !== originalSettings.significant_movement_threshold
     );
   };
 
