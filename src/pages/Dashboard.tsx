@@ -15,10 +15,14 @@ import {
   Alert,
   CircularProgress,
   Stack,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { stocks, model, settings } from '../services/api';
-import type { UserStock, UserSettings } from '../services/api';
+import type { UserStock, UserSettings, AvailableStock } from '../services/api';
 import SettingsPanel from '../components/SettingsPanel';
 import TelegramConnect from '../components/TelegramConnect';
 import PredictionModal from '../components/PredictionModal';
@@ -26,6 +30,7 @@ import ModelTrainingModal from '../components/ModelTrainingModal';
 
 const Dashboard = () => {
   const [userStocks, setUserStocks] = useState<UserStock[]>([]);
+  const [availableStocks, setAvailableStocks] = useState<AvailableStock[]>([]);
   const [newSymbol, setNewSymbol] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +49,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadUserStocks();
+    loadAvailableStocks();
     const loadSettings = async () => {
       try {
         const response = await settings.getSettings();
@@ -65,6 +71,15 @@ const Dashboard = () => {
       setError('Failed to load stocks');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadAvailableStocks = async () => {
+    try {
+      const response = await stocks.getAvailableStocks(true); // Only get enabled stocks
+      setAvailableStocks(response.data);
+    } catch (err: any) {
+      setError('Failed to load available stocks');
     }
   };
 
@@ -101,12 +116,12 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       setError('');
-      const response = await stocks.addStocks([newSymbol.toUpperCase()]);
+      const response = await stocks.addStocks([newSymbol]);
       setUserStocks(prev => [...prev, ...response.data]);
       setNewSymbol('');
       
       // Automatically train the model for the new stock
-      await trainStock(newSymbol.toUpperCase());
+      await trainStock(newSymbol);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to add stock');
     } finally {
@@ -165,14 +180,24 @@ const Dashboard = () => {
                 {error}
               </Alert>
             )}
-            <Box component="form" onSubmit={handleAddStock} sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                size="small"
-                label="Stock Symbol"
-                value={newSymbol}
-                onChange={(e) => setNewSymbol(e.target.value)}
-                placeholder="e.g., AAPL"
-              />
+            <Box component="form" onSubmit={handleAddStock} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+              <FormControl size="small" sx={{ minWidth: 300, maxWidth: '60%' }}>
+                <InputLabel>Select Stock</InputLabel>
+                <Select
+                  value={newSymbol}
+                  onChange={(e) => setNewSymbol(e.target.value)}
+                  label="Select Stock"
+                  disabled={isLoading}
+                >
+                  {availableStocks
+                    .filter(stock => !userStocks.some(us => us.symbol === stock.symbol && us.enabled))
+                    .map((stock) => (
+                      <MenuItem key={stock.symbol} value={stock.symbol}>
+                        {stock.name} ({stock.symbol})
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
               <Button
                 type="submit"
                 variant="contained"

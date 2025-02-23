@@ -80,6 +80,15 @@ export interface GoogleToken {
   token: string;
 }
 
+export interface AvailableStock {
+  id: number;
+  symbol: string;
+  name: string;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
+
 // Auth endpoints
 export const auth = {
   login: async (credentials: LoginCredentials) => {
@@ -108,21 +117,23 @@ export const auth = {
 // Stocks endpoints
 export const stocks = {
   getStocks: () => 
-    api.get<UserStock[]>('/stocks'),
+    api.get<UserStock[]>('/users/stocks'),
   addStocks: (symbols: string[]) => 
-    api.post<UserStock[]>('/stocks', { symbols }),
+    api.post<UserStock[]>('/users/stocks', { symbols }),
   removeStocks: (symbols: string[]) => 
-    api.delete<UserStock[]>('/stocks', { data: { symbols } }),
+    api.delete<UserStock[]>('/users/stocks', { data: { symbols } }),
   predict: (symbol: string, notify: boolean = true) => 
     api.post('/predict', { symbol, notify }),
+  getAvailableStocks: (enabled?: boolean) => 
+    api.get<AvailableStock[]>('/stocks', { params: { enabled } }),
 };
 
 // Settings endpoints
 export const settings = {
   getSettings: () => 
-    api.get<UserSettings>('/settings'),
+    api.get<UserSettings>('/users/settings'),
   updateSettings: (data: Partial<UserSettings>) => 
-    api.put<UserSettings>('/settings', data),
+    api.put<UserSettings>('/users/settings', data),
 };
 
 // Model training endpoints
