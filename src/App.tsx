@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import Favicon from './components/Favicon';
+import GoodbyePage from './pages/GoodbyePage';
 
 // Create theme instance
 const theme = createTheme({
@@ -178,6 +179,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/goodbye" element={<GoodbyePage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>

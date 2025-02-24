@@ -29,6 +29,7 @@ import TelegramConnect from '../components/TelegramConnect';
 import PredictionModal from '../components/PredictionModal';
 import ModelTrainingModal from '../components/ModelTrainingModal';
 import { alpha } from '@mui/material/styles';
+import DeleteAccountDialog from '../components/DeleteAccountDialog';
 
 const Dashboard = () => {
   const [userStocks, setUserStocks] = useState<UserStock[]>([]);
@@ -49,6 +50,7 @@ const Dashboard = () => {
   const [trainingModalOpen, setTrainingModalOpen] = useState(false);
   const [trainedSymbol, setTrainedSymbol] = useState('');
   const STOCK_LIMIT = 5; // Define the stock limit constant
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     loadUserStocks();
@@ -356,7 +358,65 @@ const Dashboard = () => {
         <Grid item xs={12} md={4}>
           <TelegramConnect />
         </Grid>
+
+        {/* Delete Account Section - Full Width */}
+        <Grid item xs={12}>
+          <Paper 
+            sx={{ 
+              p: 3,
+              mt: 3,
+              borderTop: '2px solid',
+              borderColor: 'error.main',
+              bgcolor: theme => alpha(theme.palette.background.paper, 0.6),
+            }}
+          >
+            <Box sx={{ maxWidth: 'md', mx: 'auto' }}>
+              <Typography variant="h6" color="error" gutterBottom>
+                Delete Account
+              </Typography>
+              <Box sx={{ 
+                p: 3, 
+                border: '1px solid',
+                borderColor: 'error.main',
+                borderRadius: 1,
+                bgcolor: theme => alpha(theme.palette.error.main, 0.08),
+              }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="subtitle1" gutterBottom>
+                      Delete Your Account Permanently
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      This will permanently delete your account, all your watchlists, settings, and trained models.
+                      This action cannot be undone.
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    sx={{
+                      ml: 3,
+                      minWidth: 150,
+                      '&:hover': {
+                        bgcolor: theme => alpha(theme.palette.error.main, 0.08),
+                      },
+                    }}
+                  >
+                    Delete Account
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
       </Grid>
+
+      <DeleteAccountDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      />
+
       <PredictionModal
         open={predictionModalOpen}
         onClose={() => {

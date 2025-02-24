@@ -112,6 +112,8 @@ export const auth = {
     api.get<AuthHealthResponse>('/health/auth'),
   googleLogin: (token: string) =>
     api.post('/auth/google-login', { token }),
+  deleteAccount: () =>
+    api.delete('/users/me'),
 };
 
 // Stocks endpoints
