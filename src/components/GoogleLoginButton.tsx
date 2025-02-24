@@ -1,14 +1,44 @@
-import React from 'react';
-import { GoogleLogin } from '@react-oauth/google';
-import { Button, Box, Typography, Divider } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { Box, Typography, Divider } from '@mui/material';
 
 interface GoogleLoginButtonProps {
   onSuccess: (token: string) => void;
   onError: () => void;
 }
 
-const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess, onError }) => {
+export interface GoogleLoginRef {
+  triggerLogin: () => void;
+}
+
+const GoogleLoginButton = forwardRef<GoogleLoginRef, GoogleLoginButtonProps>(({ onSuccess, onError }, ref) => {
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    triggerLogin: () => {
+      if (buttonRef.current) {
+        const button = buttonRef.current.querySelector('button');
+        if (button) {
+          button.click();
+        }
+      }
+    }
+  }));
+
+  const handleSuccess = (response: CredentialResponse) => {
+    if (response.credential) {
+      onSuccess(response.credential);
+    } else {
+      console.error('No credential received from Google');
+      onError();
+    }
+  };
+
+  const handleError = () => {
+    console.error('Google Sign-In Failed');
+    onError();
+  };
+
   return (
     <Box sx={{ width: '100%', mt: 2 }}>
       <Divider sx={{ my: 2 }}>
@@ -17,21 +47,25 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess, onErro
         </Typography>
       </Divider>
       
-      <GoogleLogin
-        onSuccess={(credentialResponse) => {
-          if (credentialResponse.credential) {
-            onSuccess(credentialResponse.credential);
-          }
-        }}
-        onError={() => {
-          console.error('Google Login Failed');
-          onError();
-        }}
-        useOneTap
-        auto_select
-      />
+      <div ref={buttonRef}>
+        <GoogleLogin
+          onSuccess={handleSuccess}
+          onError={handleError}
+          useOneTap={false}
+          auto_select={false}
+          type="standard"
+          theme="outline"
+          size="large"
+          text="signin_with"
+          shape="rectangular"
+          locale="en"
+          context="signin"
+        />
+      </div>
     </Box>
   );
-};
+});
+
+GoogleLoginButton.displayName = 'GoogleLoginButton';
 
 export default GoogleLoginButton; 

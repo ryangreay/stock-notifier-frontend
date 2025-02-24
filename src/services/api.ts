@@ -89,6 +89,26 @@ export interface AvailableStock {
   updated_at: string | null;
 }
 
+export interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
+
+export interface DeletedAccountResponse {
+  email: string;
+  deletion_date: string;
+  can_reactivate: boolean;
+  reactivation_deadline: string;
+  deletion_type: 'password' | 'google';
+}
+
+export interface ReactivateAccountRequest {
+  email: string;
+  password?: string;
+  google_token?: string;
+}
+
 // Auth endpoints
 export const auth = {
   login: async (credentials: LoginCredentials) => {
@@ -114,6 +134,10 @@ export const auth = {
     api.post('/auth/google-login', { token }),
   deleteAccount: () =>
     api.delete('/users/me'),
+  checkDeletedAccount: (email: string) =>
+    api.get<DeletedAccountResponse>(`/auth/check-deleted-account/${email}`),
+  reactivateAccount: (data: ReactivateAccountRequest) =>
+    api.post<TokenResponse>('/auth/reactivate', data),
 };
 
 // Stocks endpoints
